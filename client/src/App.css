@@ -1,0 +1,81 @@
+.app-container{
+  display: grid;
+  height:100vh;
+  grid-template-rows: 65px 1fr;
+}
+
+.header{
+  display: flex;
+  background-color: #095886;
+  align-items: center;
+  justify-content: space-between;
+  height: 65px;
+  color:black;
+}
+
+.header-item{
+  color: white;
+}
+
+.login-button{
+    width: 100px;
+    margin-right: 20px;
+    padding: 10px;
+    font-size: 20px;
+    border-radius: 10px;
+    background-color: #3397CF;
+    color: white;
+    border-style: none;
+}
+
+.login-button:hover{
+  background-color: #589dc5;
+  cursor: pointer;
+}
+
+.create-button{
+  margin:10px;
+  padding: 10px;
+  font-size: 15px;
+  border-radius: 10px;
+  background-color: #3397CF;
+  color: white;
+  border-style: none;
+}
+
+.create-button:hover{
+  background-color: #589dc5;
+  cursor: pointer;
+}
+
+.submit-button{
+  width: 80px;
+  margin-right: 20px;
+  padding: 10px;
+  font-size: 15px;
+  border-radius: 10px;
+  background-color: #3397CF;
+  color: white;
+  border-style: none;
+}
+
+.submit-button:hover{
+  background-color: #589dc5;
+  cursor: pointer;
+}
+
+
+
+.content{
+  background-color: #052e46;
+  padding:30px;
+  padding-left:20vw;
+  padding-right:20vw;
+  height: auto;
+  color: white;
+  overflow-y: scroll;
+}
+
+.warning{
+  color:red;
+}
