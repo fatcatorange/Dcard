@@ -1,10 +1,10 @@
 import './App.css';
 import React from 'react';
 import Content from './Content';
+import { CLIENT_ID,REPO,OWNER} from './Information';
 
 const { Octokit } = require("@octokit/rest");
 
-const CLIENT_ID = "f0c153b47154dbb6cf50"
 
 type Data = {
   login:string;
@@ -83,8 +83,8 @@ function App() {
     })
     
     await octokit.request('POST /repos/{owner}/{repo}/issues', {
-      owner: 'fatcatorange',
-      repo: 'OAuth-issue',
+      owner: OWNER,
+      repo: REPO,
       title: createContent.title,
       body: createContent.body,
       headers: {
@@ -94,15 +94,15 @@ function App() {
     window.location.assign("http://localhost:3000/");
   }
 
-  async function getIssue(issueID:number){
+  async function getIssue(issueID:number):Promise<IssueData|undefined|null>{
     const octokit = new Octokit({
       auth: localStorage.getItem("accessToken")
     })
     
     try{
       let issue = await octokit.request('GET /repos/{owner}/{repo}/issues/{issue_number}', {
-        owner: 'fatcatorange',
-        repo: 'OAuth-issue',
+        owner: OWNER,
+        repo: REPO,
         issue_number: issueID,
         headers: {
           'X-GitHub-Api-Version': '2022-11-28'
@@ -131,8 +131,8 @@ function App() {
     console.log(issueID,changeTitle,changeBody);
     try{
       let issue = await octokit.request('PATCH /repos/{owner}/{repo}/issues/{issue_number}', {
-        owner: 'fatcatorange',
-        repo: 'OAuth-issue',
+        owner: OWNER,
+        repo: REPO,
         body: changeBody,
         title: changeTitle,
         issue_number: issueID,
@@ -201,7 +201,7 @@ function App() {
       {localStorage.getItem("accessToken")?
         <>
           <div className="content" ref={containerRef} onScroll={handleScroll}>
-            { userData.login === "fatcatorange" &&<button onClick = {()=>setCreating(prev=>!prev)}
+            { userData.login === OWNER &&<button onClick = {()=>setCreating(prev=>!prev)}
              className='create-button'>{creating === true ? "cancel":"create new issue"}</button>}
             {creating === true && 
               <div>

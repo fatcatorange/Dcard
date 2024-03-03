@@ -1,6 +1,10 @@
-import React from "react";
+import React, { ReactElement } from "react";
 import './Issue.css'
 import Markdown from "react-markdown";
+import Comment from "./Comment";
+import { REPO,OWNER} from './Information';
+
+const { Octokit } = require("@octokit/rest");
 
 type IssueProps = {
   id: number;
@@ -10,6 +14,7 @@ type IssueProps = {
   updateIssue: (id:number,title:string,body:string)=>void;
 };
 
+
 const Issue: React.FC<IssueProps> = (props) =>{
   
   const [browse, setBrowse] = React.useState(false);
@@ -17,6 +22,35 @@ const Issue: React.FC<IssueProps> = (props) =>{
   const [title,setTitle] = React.useState(props.title);
   const [body,setBody] = React.useState(props.body);
   const [warning,setWarning] = React.useState("");
+  const [comments,setComments] = React.useState<JSX.Element[] | undefined>(undefined);
+  const [displayComments,setDisplayComments] = React.useState(false);
+
+  async function getIssueCommit(){
+    const octokit = new Octokit({
+      auth: localStorage.getItem('accessToken')
+    })
+    
+    try{
+      const res = await octokit.request('GET /repos/{owner}/{repo}/issues/{issue_number}/comments', {
+        owner: OWNER,
+        repo: REPO,
+        issue_number: props.id,
+        headers: {
+          'X-GitHub-Api-Version': '2022-11-28'
+        }
+      })
+      let temp:JSX.Element[] = [];
+      for(let i=0;i<res.data.length;i++){
+        temp.push(<Comment key = {props.id + "comment" + i} id = {res.data[i].id}  body = {res.data[i].body}/>);
+      }
+      setComments(temp);
+      console.log(temp);
+    }
+    catch(error){
+      console.log(error);
+    }
+    
+  }
 
   function handleChangeTitle(event: React.ChangeEvent<HTMLTextAreaElement>){
     setTitle(event.target.value);
@@ -24,6 +58,14 @@ const Issue: React.FC<IssueProps> = (props) =>{
 
   function handleChangeBody(event: React.ChangeEvent<HTMLTextAreaElement>){
     setBody(event.target.value);
+  }
+
+  async function handleCommentsDisplay(){
+    if(comments === undefined){
+      await getIssueCommit();
+      console.log(comments)
+    }
+    setDisplayComments(prev=>!prev);
   }
 
   return (
@@ -68,8 +110,13 @@ const Issue: React.FC<IssueProps> = (props) =>{
       </div>
       :
       <div>
-        <Markdown>{props.title}</Markdown>
+        <h2>{props.title}</h2>
         {browse === true && <Markdown>{props.body}</Markdown>}
+        {browse === true && <div className="rightLine"></div> &&
+         <div className="comment-display-button" onClick = {handleCommentsDisplay}>comment</div> }
+        {browse === true && displayComments === true && comments}
+        {browse === true && displayComments === true && comments != undefined && comments.length === 0 &&
+        <h6>There are no comments</h6>}
       </div>
       }
       

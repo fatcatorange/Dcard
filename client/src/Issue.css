@@ -1,3 +1,8 @@
+h6{
+  margin-top:5px;
+  margin-bottom:5px;
+}
+
 .issue-container{
   border-top-style: solid;
   border-top-width: 1px;
@@ -34,3 +39,28 @@
   padding:10px;
 }
 
+.comment-display-button{
+  margin-bottom: 10px;
+  border-bottom-style: solid;
+  border-color:transparent;
+  background: none;
+  color:white;
+  cursor: pointer;
+  padding:0;
+  transition-duration: 0.5s;
+}
+
+.comment-display-button::before{
+  content: "";
+  display: inline-block;
+  width: 20px;
+  height:1px;
+  margin-bottom:3px;
+  margin-right:2px;
+  background-color: lightgray;
+  
+}
+
+.comment-display-button:hover{
+  color:rgb(64, 143, 143);
+}
