@@ -5,7 +5,6 @@ type IssueData = {
   title:string;
   body:string;
   closed_at:null|string;
-  
 }
 
 type ContentProps = {
@@ -17,7 +16,7 @@ type ContentProps = {
 
 const Content:React.FC<ContentProps> = (props) => {
   const [nowDisplay, setNowDisplay] = React.useState<JSX.Element[]>([]);
-  const [bottom,setBottom] = React.useState(false);
+  const [bottom,setBottom] = React.useState(false); // no more issues
   const [rerender,setRerender] = React.useState(false);
   const closeRef = React.useRef(0);
 
@@ -57,6 +56,7 @@ const Content:React.FC<ContentProps> = (props) => {
     
     <div>
       {nowDisplay}
+      {bottom === true && <h4 style={{textAlign:"center"}}>~~~There are no more posts~~~</h4>}
     </div>
   )
 }
