@@ -34,8 +34,11 @@ function App() {
     const codeParam = urlParams.get("code");
 
     async function getAccessToken(){
-      await fetch("http://localhost:4000/getAccessToken?code=" + codeParam,{
-        method:"GET"
+      await fetch("http://localhost:4000/getAccessToken/?code=" + codeParam,{
+        method:"GET",
+        headers:{
+          'ngrok-skip-browser-warning': 'true'
+        }
       }).then((response)=>{
         return response.json();
       }).then((data)=>{
@@ -59,7 +62,8 @@ function App() {
     await fetch("http://localhost:4000/getUserData", {
       method: "GET",
       headers: {
-        "Authorization" : "Bearer " + localStorage.getItem("accessToken")
+        "Authorization" : "Bearer " + localStorage.getItem("accessToken"),
+        'ngrok-skip-browser-warning': 'true'
       }
     }).then((response) => {
       return response.json();

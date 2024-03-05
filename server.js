@@ -17,11 +17,13 @@ app.get('/getAccessToken',async function(req,res) {
   await fetch("https://github.com/login/oauth/access_token" + params, {
     method: "POST",
     headers: {
-      "Accept": "application/json"
+      "Accept": "application/json",
+      'ngrok-skip-browser-warning': 'true'
     }
   }).then((response)=>{
     return response.json();
   }).then((data)=>{
+    res.header('Access-Control-Allow-Origin', '*');
     res.json(data);
   })
 });
@@ -32,12 +34,14 @@ app.get('/getUserData', async function(req,res){
   await fetch("https://api.github.com/user",{
     method: "GET",
     headers:{
-      "Authorization" : req.get("Authorization")
+      "Authorization" : req.get("Authorization"),
+      'ngrok-skip-browser-warning': 'true'
     }
   }).then((response) => {
     return response.json();
   }).then((data)=>{
     console.log(data);
+    res.header('Access-Control-Allow-Origin', '*');
     res.json(data);
   })
 })

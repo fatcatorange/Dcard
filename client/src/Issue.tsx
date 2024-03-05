@@ -68,12 +68,38 @@ const Issue: React.FC<IssueProps> = (props) =>{
     setDisplayComments(prev=>!prev);
   }
 
+  async function handleClosedPost(){
+    try{
+      const octokit = new Octokit({
+        auth: localStorage.getItem('accessToken')
+      })
+      
+      let tmp = await octokit.request('Patch /repos/{owner}/{repo}/issues/{issue_number}', {
+        owner: OWNER,
+        repo: REPO,
+        issue_number: props.id,
+        state:"closed",
+        headers: {
+          'X-GitHub-Api-Version': '2022-11-28'
+        }
+      })
+      console.log(tmp);
+      window.location.assign("http://localhost:3000/");
+
+    }
+    catch(error){
+      console.log(error);
+    }
+  }
+
   return (
     <div className="issue-container">
       <div>{props.id}</div>
       <button onClick={()=>{setBrowse(prev=>(!prev)); setUpdating(false) }} className = "issue-button">{browse === true ? "hide": "show"}</button>
       {props.userData != undefined && props.userData === "fatcatorange" && 
       <button onClick = {()=>setUpdating(prev=>(!prev))} className = "issue-button">{updating === true ? "cancel" : "update"}</button>}
+      {props.userData != undefined && props.userData === "fatcatorange" && 
+      <button onClick = {handleClosedPost} className = "issue-button">{updating === true ? "cancel" : "delete"}</button>}
       {updating === true ? 
       <div>
         <div>
