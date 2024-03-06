@@ -17,27 +17,11 @@ type IssueProps = {
 
 
 const Issue: React.FC<IssueProps> = (props) =>{
-  
-  const [updating,setUpdating] = React.useState(false);
-  const [title,setTitle] = React.useState(props.title);
-  const [body,setBody] = React.useState(props.body);
-
-
-
-
-
-
-
-
-
-
   return (
     <div className="issue-container" onClick = {props.setBrowse}>
       {
       <div>
-        <h2>{props.title}</h2>
-        <Markdown>{props.body + "..."}</Markdown>
-        
+        <h2>{props.id + ". " + props.title}</h2>
       </div>
       }
       

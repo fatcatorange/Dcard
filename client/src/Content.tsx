@@ -1,6 +1,8 @@
 import React from "react";
 import Issue from "./Issue";
 import PostPage from "./PostPage";
+import Create from "./Create";
+import { OWNER } from "./Information";
 
 type IssueData = {
   title:string,
@@ -24,12 +26,13 @@ const Content:React.FC<ContentProps> = (props) => {
   const [nowDisplayID,setNowDisplayID] = React.useState(1);
   const closeRef = React.useRef(0);
   const containerRef = React.useRef<HTMLInputElement>(null);
+  const [creating,setCreating] = React.useState(false);
 
   async function getTenIssue(){
     if(bottom === true) 
       return;
-    let tmp:JSX.Element[] = [];
     let tmpIssueData:IssueData[] = [];
+    let check = false;
     for(let i:number = nowDisplayID + closeRef.current;i< (nowDisplayID + 10 + closeRef.current);i++){
       const res:IssueData|undefined|null = await props.getIssue(i);
       if(res != null){
@@ -39,25 +42,23 @@ const Content:React.FC<ContentProps> = (props) => {
         }
         const content = <Issue id = {i} title = {res.title} body = {res.body} key = {"issue" + i} setBrowse = {()=>setBrowsing(i - closeRef.current)}
                         updateIssue = {(issueID,changeTitle,changeBody)=>{props.updateIssue(issueID,changeTitle,changeBody);}} userData = {props.userData}/>
-        tmp.push(content);
+        setNowDisplay(prev=>[...prev, content]);
         res.id = i;
         tmpIssueData.push(res);
       }
       else if(res === null)
       {
-        setBottom(true);
+        check = true;
         break;
       }
     }
-    setNowDisplay(prev=>[...prev, ...tmp]);
     setContent(prev=>[...prev,...tmpIssueData]);
     setRerender(prev=>(!prev));
+    if(check === true){
+      setBottom(true);
+    }
   }
 
-  React.useEffect(function(){
-    console.log(content);
-    console.log(browsing);
-  },[content])
 
   React.useEffect(function(){
     getTenIssue();
@@ -79,12 +80,20 @@ const Content:React.FC<ContentProps> = (props) => {
     <div className="content" ref = {containerRef} onScroll={handleScroll}>
       {browsing === 0?
         <div className="all-issue-container">
-          {nowDisplay}
-          {bottom === true && <h4 style={{textAlign:"center"}}>~~~There are no more posts~~~</h4>}
+          {props.userData === OWNER && <button className="create-button" onClick={()=>setCreating(prev=>!prev)}>{creating === false ? "create" : "cancel"}</button>}
+          {creating === false ? 
+          <div>
+            {nowDisplay}
+            {bottom === true && <h4 style={{textAlign:"center"}}>~~~There are no more posts~~~</h4>}
+          </div>
+          :
+            <Create></Create>
+          }
+          
         </div>
         :
         <PostPage title = {content[browsing - 1].title} id = {content[browsing - 1].id} body= {content[browsing - 1].body} backToContent = {()=>setBrowsing(0)}
-          userData = {props.userData}/>
+          userData = {props.userData} />
       }
       
     </div>

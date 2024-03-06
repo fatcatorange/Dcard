@@ -22,12 +22,6 @@ type IssueData = {
 function App() {
   const [rerender,setRerender] = React.useState(false);
   const [userData,setUserData] = React.useState<Data>({login:""});
-  const [createContent,setCreateContent] = React.useState({title:"",body:""});
-  const [creating,setCreating] = React.useState(false);
-  const [warning,setWarning] = React.useState("");
-  const containerRef = React.useRef<HTMLInputElement>(null);
-
-
   React.useEffect(()=>{
     const queryString = window.location.search;
     const urlParams = new URLSearchParams(queryString);
@@ -77,26 +71,6 @@ function App() {
     window.location.assign("https://github.com/login/oauth/authorize?client_id=" + CLIENT_ID + "&scope=user repo");
   }
 
-  async function createIssue(){
-    if(createContent.body.length < 30 || createContent.title.trim() === ""){
-      setWarning("Your body field is not long enough or the title is empty!");
-      return;
-    }
-    const octokit = new Octokit({
-      auth: localStorage.getItem("accessToken")
-    })
-    
-    await octokit.request('POST /repos/{owner}/{repo}/issues', {
-      owner: OWNER,
-      repo: REPO,
-      title: createContent.title,
-      body: createContent.body,
-      headers: {
-        'X-GitHub-Api-Version': '2022-11-28'
-      }
-    })
-    window.location.assign("http://localhost:3000/");
-  }
 
   async function getIssue(issueID:number):Promise<IssueData|undefined|null>{
     const octokit = new Octokit({
@@ -116,7 +90,8 @@ function App() {
         title:issue.data.title,
         body:issue.data.body,
         closed_at:issue.data.closed_at,
-        id:issue.data.id
+        id:issue.data.id,
+        
       } 
       return issueData
     }
@@ -155,26 +130,6 @@ function App() {
       }
       return undefined;
     }
-  }
-
-
-
-  function handleChangeTitle(event: React.ChangeEvent<HTMLTextAreaElement>){
-    setCreateContent(prev=>{
-      return ({
-        ...prev,
-        title:event.target.value
-      })
-    });
-  }
-
-  function handleChangeBody(event: React.ChangeEvent<HTMLTextAreaElement>){
-    setCreateContent(prev=>{
-      return ({
-        ...prev,
-        body:event.target.value
-      })
-    });
   }
 
 

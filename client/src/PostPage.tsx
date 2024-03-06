@@ -95,7 +95,6 @@ const PostPage:React.FC<PostPageProps> = (props) => {
               'X-GitHub-Api-Version': '2022-11-28'
             }
           })
-          console.log(tmp);
           window.location.assign("http://localhost:3000/");
     
         }
@@ -107,7 +106,6 @@ const PostPage:React.FC<PostPageProps> = (props) => {
     async function handleCommentsDisplay(){
         if(comments === undefined){
           await getIssueCommit();
-          console.log(comments)
         }
         setDisplayComments(prev=>!prev);
     }
@@ -124,7 +122,7 @@ const PostPage:React.FC<PostPageProps> = (props) => {
         <div className="PostPage-container" >
             <div className="tool-bar">
                 <button onClick={props.backToContent} className="submit-button">back</button>
-                {props.userData != undefined && props.userData === "fatcatorange"? 
+                {props.userData != undefined && props.userData === OWNER? 
                 <div>
                     <button className="tool-button" onClick={()=>setUpdating(prev => !prev)}>{updating === false ? "update":"cancel"}</button>
                     <button className="tool-button" onClick={handleClosedPost}>delete</button>
@@ -145,15 +143,14 @@ const PostPage:React.FC<PostPageProps> = (props) => {
         </div>
         :
         <div>
-            <div>
+          <div>
             <h3>title:</h3>
             <textarea 
                 id = {"issue change title" + props.id}
                 value = {title}
                 onChange = {handleChangeTitle}
-                cols= {40}
-                rows= {2}
                 className="input-field"
+                style={{width:'50%'}}
             />
 
             <h3>body:</h3>
@@ -161,12 +158,10 @@ const PostPage:React.FC<PostPageProps> = (props) => {
                 id = {"issue change body" + props.id}
                 value = {body}
                 onChange = {handleChangeBody}
-                cols={80}
-                rows={10}
                 className="input-field"
+                style={{width:'80%', height:'300px'}}
             />
-            </div>
-            
+          </div>
             {warning !== "" && <h5 className="warning">{warning}</h5>}
             <button onClick = {()=>{
             if(body.length < 30 || title.trim() === ""){
@@ -175,11 +170,11 @@ const PostPage:React.FC<PostPageProps> = (props) => {
             }
             updateIssue(props.id,title,body)
             }} className="issue-button">submit</button>
-
+          
         </div>
-        }
+      }
             
-        </div>
+      </div>
     )
 }
 
