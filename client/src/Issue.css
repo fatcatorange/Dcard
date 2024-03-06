@@ -3,15 +3,21 @@ h6{
   margin-bottom:5px;
 }
 
+.all-issue-container{
+  padding: 20px;
+  background-color: white;
+}
+
 .issue-container{
   border-top-style: solid;
   border-top-width: 1px;
-  margin:10px;
   min-height: 10vh;
   padding: 10px;
   border-color: darkgray;
-  color:white;
+  color:black;
   word-wrap: break-word;
+  background-color: white;
+  cursor: pointer;
 }
 
 .issue-button{
@@ -44,7 +50,7 @@ h6{
   border-bottom-style: solid;
   border-color:transparent;
   background: none;
-  color:white;
+  color:gray;
   cursor: pointer;
   padding:0;
   transition-duration: 0.5s;

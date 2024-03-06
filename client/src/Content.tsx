@@ -1,39 +1,47 @@
 import React from "react";
 import Issue from "./Issue";
+import PostPage from "./PostPage";
 
 type IssueData = {
-  title:string;
-  body:string;
+  title:string,
+  body:string,
+  id:string|number,
   closed_at:null|string;
 }
 
 type ContentProps = {
   getIssue: (issueID: number)=>Promise<IssueData | null | undefined>;
   updateIssue: (issueID: number,changeTitle: string,changeBody: string)=>Promise<IssueData | null | undefined>;
-  nowDisplayID: number;
   userData: string | undefined;
 }
 
 const Content:React.FC<ContentProps> = (props) => {
   const [nowDisplay, setNowDisplay] = React.useState<JSX.Element[]>([]);
+  const [browsing,setBrowsing] = React.useState(0);
+  const [content,setContent] = React.useState<IssueData[]>([]);
   const [bottom,setBottom] = React.useState(false); // no more issues
   const [rerender,setRerender] = React.useState(false);
+  const [nowDisplayID,setNowDisplayID] = React.useState(1);
   const closeRef = React.useRef(0);
+  const containerRef = React.useRef<HTMLInputElement>(null);
 
   async function getTenIssue(){
     if(bottom === true) 
       return;
     let tmp:JSX.Element[] = [];
-    for(let i:number = props.nowDisplayID + closeRef.current;i< (props.nowDisplayID + 10 + closeRef.current);i++){
+    let tmpIssueData:IssueData[] = [];
+    for(let i:number = nowDisplayID + closeRef.current;i< (nowDisplayID + 10 + closeRef.current);i++){
       const res:IssueData|undefined|null = await props.getIssue(i);
       if(res != null){
         if(res.closed_at != null){
           closeRef.current++;
           continue;
         }
-        const content = <Issue id = {i} title = {res.title} body = {res.body} key = {"issue" + i} 
+        const content = <Issue id = {i} title = {res.title} body = {res.body} key = {"issue" + i} setBrowse = {()=>setBrowsing(i - closeRef.current)}
                         updateIssue = {(issueID,changeTitle,changeBody)=>{props.updateIssue(issueID,changeTitle,changeBody);}} userData = {props.userData}/>
         tmp.push(content);
+        res.id = i;
+        tmpIssueData.push(res);
       }
       else if(res === null)
       {
@@ -42,21 +50,43 @@ const Content:React.FC<ContentProps> = (props) => {
       }
     }
     setNowDisplay(prev=>[...prev, ...tmp]);
+    setContent(prev=>[...prev,...tmpIssueData]);
     setRerender(prev=>(!prev));
   }
 
   React.useEffect(function(){
+    console.log(content);
+    console.log(browsing);
+  },[content])
+
+  React.useEffect(function(){
     getTenIssue();
-  },[props.nowDisplayID])
+  },[nowDisplayID])
 
+  const handleScroll = () =>{
+    const container = containerRef.current;
 
+    if(container){
+      if(container.scrollHeight - container.clientHeight <= container.scrollTop + 1){
+        setNowDisplayID(prev=>prev+10);
+      }
+    }
+
+  }
 
 
   return (
-    
-    <div>
-      {nowDisplay}
-      {bottom === true && <h4 style={{textAlign:"center"}}>~~~There are no more posts~~~</h4>}
+    <div className="content" ref = {containerRef} onScroll={handleScroll}>
+      {browsing === 0?
+        <div className="all-issue-container">
+          {nowDisplay}
+          {bottom === true && <h4 style={{textAlign:"center"}}>~~~There are no more posts~~~</h4>}
+        </div>
+        :
+        <PostPage title = {content[browsing - 1].title} id = {content[browsing - 1].id} body= {content[browsing - 1].body} backToContent = {()=>setBrowsing(0)}
+          userData = {props.userData}/>
+      }
+      
     </div>
   )
 }

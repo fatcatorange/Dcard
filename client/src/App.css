@@ -50,6 +50,7 @@
 
 .submit-button{
   width: 80px;
+  height: 40px;
   margin-right: 20px;
   padding: 10px;
   font-size: 15px;
@@ -72,10 +73,42 @@
   padding-left:20vw;
   padding-right:20vw;
   height: auto;
-  color: white;
+  color: black;
   overflow-y: scroll;
 }
 
 .warning{
   color:red;
+}
+
+.PostPage-container{
+  min-height: 50vh;
+  background-color: white;
+  padding: 10px;
+}
+
+.PostPage-button{
+  margin-top: 10px;
+}
+
+.tool-bar{
+  display: grid;
+  grid-template-columns: 15fr 1fr;
+}
+
+.tool-button{
+  width: 80px;
+  margin-right: 20px;
+  padding: 10px;
+  font-size: 15px;
+  border-radius: 10px;
+  background-color: #3397CF;
+  color: white;
+  border-style: none;
+  margin-bottom:10px;
+}
+
+.tool-button:hover{
+  background-color: #589dc5;
+  cursor: pointer;
 }

@@ -13,6 +13,7 @@ type Data = {
 type IssueData = {
   title:string;
   body:string;
+  id:string|number;
   closed_at:string;
 }
 
@@ -24,7 +25,6 @@ function App() {
   const [createContent,setCreateContent] = React.useState({title:"",body:""});
   const [creating,setCreating] = React.useState(false);
   const [warning,setWarning] = React.useState("");
-  const [nowDisplayID,setNowDisplayID] = React.useState(1);
   const containerRef = React.useRef<HTMLInputElement>(null);
 
 
@@ -34,7 +34,7 @@ function App() {
     const codeParam = urlParams.get("code");
 
     async function getAccessToken(){
-      await fetch("http://localhost:4000/getAccessToken/?code=" + codeParam,{
+      await fetch("https://b12c-2001-288-7001-270c-995c-d673-663a-35bb.ngrok-free.app/getAccessToken/?code=" + codeParam,{
         method:"GET",
         headers:{
           'ngrok-skip-browser-warning': 'true'
@@ -59,7 +59,7 @@ function App() {
   },[])
 
   async function getUserData(){
-    await fetch("http://localhost:4000/getUserData", {
+    await fetch("https://b12c-2001-288-7001-270c-995c-d673-663a-35bb.ngrok-free.app/getUserData", {
       method: "GET",
       headers: {
         "Authorization" : "Bearer " + localStorage.getItem("accessToken"),
@@ -115,7 +115,8 @@ function App() {
       const issueData:IssueData = {
         title:issue.data.title,
         body:issue.data.body,
-        closed_at:issue.data.closed_at
+        closed_at:issue.data.closed_at,
+        id:issue.data.id
       } 
       return issueData
     }
@@ -176,16 +177,7 @@ function App() {
     });
   }
 
-  const handleScroll = () =>{
-    const container = containerRef.current;
 
-    if(container){
-      if(container.scrollHeight - container.clientHeight <= container.scrollTop + 1){
-        setNowDisplayID(prev=>prev+10);
-      }
-    }
-
-  }
 
   return (
     <div className="app-container">
@@ -202,50 +194,8 @@ function App() {
         </>
         }
       </div>
-      {localStorage.getItem("accessToken")?
-        <>
-          <div className="content" ref={containerRef} onScroll={handleScroll}>
-            { userData.login === OWNER &&<button onClick = {()=>setCreating(prev=>!prev)}
-             className='create-button'>{creating === true ? "cancel":"create new issue"}</button>}
-            {creating === true && 
-              <div>
-                <div>
-                  <h3>title:</h3>
-                  <textarea 
-                    id="create title"
-                    value = {createContent.title}
-                    onChange = {handleChangeTitle}
-                    cols={20}
-                    rows={2}
-                    className="input-field"
-                  />
-        
-                  <h3>body:</h3>
-                  <textarea  
-                  id="create body"
-                  value = {createContent.body}
-                  onChange = {handleChangeBody}
-                  cols={80}
-                  rows={10}
-                  className="input-field"
-                  />
-                  
-                </div>
-                {warning !== "" && <h5 className='warning'>{warning}</h5>}
-                <button className='submit-button' onClick = {createIssue}>submit</button>
-              </div>
-            }
-
-            {userData.login != "" && <Content getIssue = {(issueID)=>getIssue(issueID) } nowDisplayID = {nowDisplayID}
+      {(userData.login === "" || !localStorage.getItem("accessToken")) ? <></>:<Content getIssue = {(issueID)=>getIssue(issueID) }
             updateIssue = {(issueID,changeTitle,changeBody):any=>{updateIssue(issueID,changeTitle,changeBody)}} userData = {userData.login}/>}
-          </div>
-        </>
-        :
-        <>
-
-        </>
-        }
-     
     </div>
     
   );
