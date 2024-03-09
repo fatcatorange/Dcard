@@ -24,9 +24,10 @@ const Content:React.FC<ContentProps> = (props) => {
   const [content,setContent] = React.useState<IssueData[]>([]);
   const [bottom,setBottom] = React.useState(false); // no more issues
   const [rerender,setRerender] = React.useState(false);
-  const nowRef = React.useRef(1);
   const containerRef = React.useRef<HTMLInputElement>(null);
   const [creating,setCreating] = React.useState(false);
+  const nowRef = React.useRef(1);
+  const lockRef = React.useRef(false);
 
   async function listTenIssue(){
     try{
@@ -71,10 +72,14 @@ const Content:React.FC<ContentProps> = (props) => {
   async function getTenIssue(){
     if(bottom === true) 
       return;
+
     let res:any = await listTenIssue();
-    if(res === undefined){
+    if(res === undefined || lockRef.current === true){
       return;
     }
+
+    lockRef.current = true;
+
     let tmpIssuePage:JSX.Element[] = [];
     for(let i=0; i<res.length ;i++){
       let nowID = nowRef.current;
@@ -91,6 +96,7 @@ const Content:React.FC<ContentProps> = (props) => {
       setBottom(true);
     }
     nowRef.current = nowRef.current+1;
+    lockRef.current = false;
   }
 
   const handleScroll = () =>{
@@ -120,13 +126,13 @@ const Content:React.FC<ContentProps> = (props) => {
             {bottom === true && <h4 style={{textAlign:"center"}}>~~~There are no more posts~~~</h4>}
           </div>
           :
-            <Create></Create>
+          <Create></Create>
           }
           
         </div>
         :
-        <PostPage title = {content[browsing - 1].title} id = {content[browsing - 1].id} number = {content[browsing - 1].number} body= {content[browsing - 1].body} backToContent = {()=>setBrowsing(0)}
-          userData = {props.userData} />
+        <PostPage title = {content[browsing - 1].title} id = {content[browsing - 1].id} number = {content[browsing - 1].number}
+          body= {content[browsing - 1].body} backToContent = {()=>setBrowsing(0)} userData = {props.userData} />
       }
       
     </div>
