@@ -72,37 +72,6 @@ function App() {
   }
 
 
-  async function getIssue(issueID:number):Promise<IssueData|undefined|null>{
-    const octokit = new Octokit({
-      auth: localStorage.getItem("accessToken")
-    })
-    
-    try{
-      let issue = await octokit.request('GET /repos/{owner}/{repo}/issues/{issue_number}', {
-        owner: OWNER,
-        repo: REPO,
-        issue_number: issueID,
-        headers: {
-          'X-GitHub-Api-Version': '2022-11-28'
-        }
-      })
-      const issueData:IssueData = {
-        title:issue.data.title,
-        body:issue.data.body,
-        closed_at:issue.data.closed_at,
-        id:issue.data.id,
-        
-      } 
-      return issueData
-    }
-    catch(error: any){
-      if(error.status == 404){
-        return null;
-      }
-      return undefined;
-    }
-  
-  }
 
   async function updateIssue(issueID:number ,changeTitle:string ,changeBody:string){
     const octokit = new Octokit({
@@ -149,7 +118,7 @@ function App() {
         </>
         }
       </div>
-      {(userData.login === "" || !localStorage.getItem("accessToken")) ? <></>:<Content getIssue = {(issueID)=>getIssue(issueID) }
+      {(userData.login === "" || !localStorage.getItem("accessToken")) ? <></>:<Content
             updateIssue = {(issueID,changeTitle,changeBody):any=>{updateIssue(issueID,changeTitle,changeBody)}} userData = {userData.login}/>}
     </div>
     

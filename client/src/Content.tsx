@@ -2,17 +2,18 @@ import React from "react";
 import Issue from "./Issue";
 import PostPage from "./PostPage";
 import Create from "./Create";
-import { OWNER } from "./Information";
+import { OWNER, REPO } from "./Information";
+
+const { Octokit } = require("@octokit/rest");
 
 type IssueData = {
   title:string,
   body:string,
   id:string|number,
-  closed_at:null|string;
+  number: number
 }
 
 type ContentProps = {
-  getIssue: (issueID: number)=>Promise<IssueData | null | undefined>;
   updateIssue: (issueID: number,changeTitle: string,changeBody: string)=>Promise<IssueData | null | undefined>;
   userData: string | undefined;
 }
@@ -23,57 +24,89 @@ const Content:React.FC<ContentProps> = (props) => {
   const [content,setContent] = React.useState<IssueData[]>([]);
   const [bottom,setBottom] = React.useState(false); // no more issues
   const [rerender,setRerender] = React.useState(false);
-  const [nowDisplayID,setNowDisplayID] = React.useState(1);
-  const closeRef = React.useRef(0);
+  const nowRef = React.useRef(1);
   const containerRef = React.useRef<HTMLInputElement>(null);
   const [creating,setCreating] = React.useState(false);
+
+  async function listTenIssue(){
+    try{
+      const octokit = new Octokit({
+        auth: localStorage.getItem("accessToken")
+      })
+      
+      const res = await octokit.request('GET /repos/{owner}/{repo}/issues', {
+        owner: OWNER,
+        repo: REPO,
+        state: 'open',
+        per_page: 10,
+        page: nowRef.current,
+        sort: 'created',
+        direction: 'asc',
+        headers: {
+          'X-GitHub-Api-Version': '2022-11-28',
+          'accept': 'application/vnd.github.raw+json'
+        }
+      })
+
+      console.log(res);
+      let retArr:IssueData[] = [];
+      for(let i=0;i<res.data.length;i++){
+        const issueData:IssueData = {
+          title:res.data[i].title,
+          body:res.data[i].body,
+          id:res.data[i].id,
+          number:res.data[i].number,
+        }
+        retArr.push(issueData);
+      }
+
+      return retArr;
+    }
+    catch(error){
+      console.log(error);
+      return undefined;
+    }
+  }
 
   async function getTenIssue(){
     if(bottom === true) 
       return;
-    let tmpIssueData:IssueData[] = [];
-    let check = false;
-    for(let i:number = nowDisplayID + closeRef.current;i< (nowDisplayID + 10 + closeRef.current);i++){
-      const res:IssueData|undefined|null = await props.getIssue(i);
-      if(res != null){
-        if(res.closed_at != null){
-          closeRef.current++;
-          continue;
-        }
-        const content = <Issue id = {i} title = {res.title} body = {res.body} key = {"issue" + i} setBrowse = {()=>setBrowsing(i - closeRef.current)}
-                        updateIssue = {(issueID,changeTitle,changeBody)=>{props.updateIssue(issueID,changeTitle,changeBody);}} userData = {props.userData}/>
-        setNowDisplay(prev=>[...prev, content]);
-        res.id = i;
-        tmpIssueData.push(res);
-      }
-      else if(res === null)
-      {
-        check = true;
-        break;
-      }
+    let res:any = await listTenIssue();
+    if(res === undefined){
+      return;
     }
-    setContent(prev=>[...prev,...tmpIssueData]);
-    setRerender(prev=>(!prev));
-    if(check === true){
+    let tmpIssuePage:JSX.Element[] = [];
+    for(let i=0; i<res.length ;i++){
+      let nowID = nowRef.current;
+      const id = i + ((nowID - 1) * 10);
+      const content = <Issue id = {id + 1} title = {res[i].title} body = {res[i].body} key = {"issue" + id} setBrowse = {()=>{setBrowsing(id + 1)}}
+                        updateIssue = {(issueID,changeTitle,changeBody)=>{props.updateIssue(issueID,changeTitle,changeBody);}} userData = {props.userData}/>
+      tmpIssuePage.push(content);
+      res[i].id = id + 1;
+    }
+    setNowDisplay((prev)=>[...prev,...tmpIssuePage]);
+    setContent((prev)=>[...prev,...res]);
+    setRerender((prev)=>!prev);
+    if(res.length < 10){
       setBottom(true);
     }
+    nowRef.current = nowRef.current+1;
   }
-
-
-  React.useEffect(function(){
-    getTenIssue();
-  },[nowDisplayID])
 
   const handleScroll = () =>{
     const container = containerRef.current;
 
     if(container){
       if(container.scrollHeight - container.clientHeight <= container.scrollTop + 1){
-        setNowDisplayID(prev=>prev+10);
+        getTenIssue();
       }
     }
 
   }
+
+  React.useEffect(function(){
+    getTenIssue();
+  },[])
 
 
   return (
@@ -92,7 +125,7 @@ const Content:React.FC<ContentProps> = (props) => {
           
         </div>
         :
-        <PostPage title = {content[browsing - 1].title} id = {content[browsing - 1].id} body= {content[browsing - 1].body} backToContent = {()=>setBrowsing(0)}
+        <PostPage title = {content[browsing - 1].title} id = {content[browsing - 1].id} number = {content[browsing - 1].number} body= {content[browsing - 1].body} backToContent = {()=>setBrowsing(0)}
           userData = {props.userData} />
       }
       

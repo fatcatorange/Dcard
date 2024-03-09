@@ -12,11 +12,11 @@ type PostPageProps = {
     body:string,
     id:string | number,
     userData:string | undefined,
+    number:number,
     backToContent:()=>void
 }
 
 const PostPage:React.FC<PostPageProps> = (props) => {
-
     const [comments,setComments] = React.useState<JSX.Element[] | undefined>(undefined);
     const [displayComments,setDisplayComments] = React.useState(false);
     const [updating,setUpdating] = React.useState(false);
@@ -35,11 +35,12 @@ const PostPage:React.FC<PostPageProps> = (props) => {
           const res = await octokit.request('GET /repos/{owner}/{repo}/issues/{issue_number}/comments', {
             owner: OWNER,
             repo: REPO,
-            issue_number: props.id,
+            issue_number: props.number,
             headers: {
               'X-GitHub-Api-Version': '2022-11-28'
             }
           })
+          console.log(res)
           let temp:JSX.Element[] = [];
           for(let i=0;i<res.data.length;i++){
             temp.push(<Comment key = {props.id + "comment" + i} id = {res.data[i].id}  body = {res.data[i].body}/>);
