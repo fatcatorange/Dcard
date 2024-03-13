@@ -28,7 +28,7 @@ function App() {
     const codeParam = urlParams.get("code");
 
     async function getAccessToken(){
-      await fetch("https://b12c-2001-288-7001-270c-995c-d673-663a-35bb.ngrok-free.app/getAccessToken/?code=" + codeParam,{
+      await fetch("https://2c07-2001-288-7001-270c-740d-e72a-37b7-80df.ngrok-free.app/getAccessToken/?code=" + codeParam,{
         method:"GET",
         headers:{
           'ngrok-skip-browser-warning': 'true'
@@ -53,7 +53,7 @@ function App() {
   },[])
 
   async function getUserData(){
-    await fetch("https://b12c-2001-288-7001-270c-995c-d673-663a-35bb.ngrok-free.app/getUserData", {
+    await fetch("https://2c07-2001-288-7001-270c-740d-e72a-37b7-80df.ngrok-free.app/getUserData", {
       method: "GET",
       headers: {
         "Authorization" : "Bearer " + localStorage.getItem("accessToken"),
