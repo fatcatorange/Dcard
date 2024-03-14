@@ -6,7 +6,11 @@ import { OWNER, REPO } from "./Information";
 
 const { Octokit } = require("@octokit/rest");
 
-type IssueData = {
+/*
+IssueData get by listTenIssue function
+*/
+
+type IssueData = { 
   title:string,
   body:string,
   id:string|number,
@@ -14,21 +18,29 @@ type IssueData = {
 }
 
 type ContentProps = {
-  updateIssue: (issueID: number,changeTitle: string,changeBody: string)=>Promise<IssueData | null | undefined>;
-  userData: string | undefined;
+  userData: string | undefined; // userName (login)
 }
 
 const Content:React.FC<ContentProps> = (props) => {
-  const [nowDisplay, setNowDisplay] = React.useState<JSX.Element[]>([]);
-  const [browsing,setBrowsing] = React.useState(0);
-  const [content,setContent] = React.useState<IssueData[]>([]);
-  const [bottom,setBottom] = React.useState(false); // no more issues
-  const [rerender,setRerender] = React.useState(false);
-  const containerRef = React.useRef<HTMLInputElement>(null);
-  const [creating,setCreating] = React.useState(false);
-  const nowRef = React.useRef(1);
-  const lockRef = React.useRef(false);
+  const [nowDisplay, setNowDisplay] = React.useState<JSX.Element[]>([]); // The issue currently displayed. (As the user scrolls down, it adds 10 more questions.)
+  /*
+  Check whether the user is currently browsing some issues. If not, the browsing value is 0. 
+  Otherwise, it represents the index of the current issue (either by ID or number).
+   */
+  const [browsing,setBrowsing] = React.useState(0); 
+  const [content,setContent] = React.useState<IssueData[]>([]); //all issueData.
+  const [bottom,setBottom] = React.useState(false); // if bottom is true,there are no more issues.
+  const [rerender,setRerender] = React.useState(false); // use for rerender page.
+  const containerRef = React.useRef<HTMLInputElement>(null); // using a ref to the component to detect whether the user has scrolled down to the bottom.
+  const [creating,setCreating] = React.useState(false); // Check whether the user is currently creating a new issue.
+  const nowRef = React.useRef(1); // The page intends to get now.
+  const lockRef = React.useRef(false); // prevent users from scrolling down too fast and making multiple API calls.
 
+
+  /*
+  Get ten issues from GitHub,
+  and add the issue data to the 'content' state.
+   */
   async function listTenIssue(){
     try{
       const octokit = new Octokit({
@@ -69,6 +81,12 @@ const Content:React.FC<ContentProps> = (props) => {
     }
   }
 
+  /*
+  Use the 'listTenIssue' function to retrieve issues. If the returned data is not undefined,
+  indicating valid data, add the 'Issue' component based on this data. Additionally,
+  if the returned data is smaller than ten, indicating that there are no more data, set the bottom state to true.
+  if the bottom is true, it means there are no more issues, just return.
+   */
   async function getTenIssue(){
     if(bottom === true) 
       return;
@@ -83,11 +101,11 @@ const Content:React.FC<ContentProps> = (props) => {
     let tmpIssuePage:JSX.Element[] = [];
     for(let i=0; i<res.length ;i++){
       let nowID = nowRef.current;
-      const id = i + ((nowID - 1) * 10);
-      const content = <Issue id = {id + 1} title = {res[i].title} body = {res[i].body} key = {"issue" + id} setBrowse = {()=>{setBrowsing(id + 1)}}
-                        updateIssue = {(issueID,changeTitle,changeBody)=>{props.updateIssue(issueID,changeTitle,changeBody);}} userData = {props.userData}/>
+      const index = i + ((nowID - 1) * 10); //calculate the index of the issue
+      const content = <Issue id = {index + 1} title = {res[i].title} body = {res[i].body} key = {"issue" + index} 
+      setBrowse = {()=>{setBrowsing(index + 1)}} userData = {props.userData}/>
       tmpIssuePage.push(content);
-      res[i].id = id + 1;
+      res[i].id = index + 1;
     }
     setNowDisplay((prev)=>[...prev,...tmpIssuePage]);
     setContent((prev)=>[...prev,...res]);
@@ -95,10 +113,14 @@ const Content:React.FC<ContentProps> = (props) => {
     if(res.length < 10){
       setBottom(true);
     }
-    nowRef.current = nowRef.current+1;
-    lockRef.current = false;
+    nowRef.current = nowRef.current+1; //change page
+    lockRef.current = false; //open lock
   }
 
+
+  /*
+  If the user scrolls down to the bottom, call the 'getTenIssue' function to retrieve 10 new issues.
+   */
   const handleScroll = () =>{
     const container = containerRef.current;
 
@@ -117,10 +139,10 @@ const Content:React.FC<ContentProps> = (props) => {
 
   return (
     <div className="content" ref = {containerRef} onScroll={handleScroll}>
-      {browsing === 0?
+      {browsing === 0? // Check if the user is currently browsing a issue now
         <div className="all-issue-container">
           {props.userData === OWNER && <button className="create-button" onClick={()=>setCreating(prev=>!prev)}>{creating === false ? "create" : "cancel"}</button>}
-          {creating === false ? 
+          {creating === false ? // Check if the user is currently creating a new post.
           <div>
             {nowDisplay}
             {bottom === true && <h4 style={{textAlign:"center"}}>~~~There are no more posts~~~</h4>}

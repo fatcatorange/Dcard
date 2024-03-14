@@ -20,17 +20,19 @@ const Create:React.FC<CreateProps> = (props) => {
         setTitle(event.target.value);
       }
     
-      function handleChangeBody(event: React.ChangeEvent<HTMLTextAreaElement>){
-        setBody(event.target.value);
+    function handleChangeBody(event: React.ChangeEvent<HTMLTextAreaElement>){
+      setBody(event.target.value);
+    }
+
+    async function createIssue(){
+      if(body.length < 30 || title.trim() === ""){
+        setWarning("Your body field is not long enough or the title is empty!");
+        return;
       }
-      async function createIssue(){
-        if(body.length < 30 || title.trim() === ""){
-          setWarning("Your body field is not long enough or the title is empty!");
-          return;
-        }
-        const octokit = new Octokit({
+
+    const octokit = new Octokit({
           auth: localStorage.getItem("accessToken")
-        })
+      })
         
         await octokit.request('POST /repos/{owner}/{repo}/issues', {
           owner: OWNER,

@@ -5,30 +5,28 @@ import { CLIENT_ID,REPO,OWNER} from './Information';
 
 const { Octokit } = require("@octokit/rest");
 
-
+/*
+The data fetched by the getUserData function.
+ */
 type Data = {
   login:string;
-}
-
-type IssueData = {
-  title:string;
-  body:string;
-  id:string|number;
-  closed_at:string;
 }
 
 
 
 function App() {
-  const [rerender,setRerender] = React.useState(false);
+  const [rerender,setRerender] = React.useState(false); //use for rerender component
   const [userData,setUserData] = React.useState<Data>({login:""});
   React.useEffect(()=>{
     const queryString = window.location.search;
     const urlParams = new URLSearchParams(queryString);
     const codeParam = urlParams.get("code");
 
+    /*
+    Using the API to request an AccessToken for the user from the server,token will store in localStorage
+     */
     async function getAccessToken(){
-      await fetch("https://b12c-2001-288-7001-270c-995c-d673-663a-35bb.ngrok-free.app/getAccessToken/?code=" + codeParam,{
+      await fetch("https://2c07-2001-288-7001-270c-740d-e72a-37b7-80df.ngrok-free.app/getAccessToken/?code=" + codeParam,{
         method:"GET",
         headers:{
           'ngrok-skip-browser-warning': 'true'
@@ -43,6 +41,11 @@ function App() {
       })
     }
 
+    /*
+    If the codeParam is not an empty string, it indicates that the page has been redirected from the GitHub login page.
+    If localStorage does not contain an accessToken, it means this is the first login attempt, so retrieve the accessToken.
+    Otherwise, if there is an accessToken available, retrieve the user data.
+     */
     if(codeParam && (localStorage.getItem("accessToken") === null)){
       getAccessToken().then(getUserData);
     }
@@ -52,8 +55,9 @@ function App() {
 
   },[])
 
+
   async function getUserData(){
-    await fetch("https://b12c-2001-288-7001-270c-995c-d673-663a-35bb.ngrok-free.app/getUserData", {
+    await fetch("https://2c07-2001-288-7001-270c-740d-e72a-37b7-80df.ngrok-free.app/getUserData", {
       method: "GET",
       headers: {
         "Authorization" : "Bearer " + localStorage.getItem("accessToken"),
@@ -67,41 +71,12 @@ function App() {
     })
   }
 
+  /*
+  If the user has logged in before, GitHub will quickly return the paramCode without requiring user agreement.
+  */
   function loginWithGithub() {
     window.location.assign("https://github.com/login/oauth/authorize?client_id=" + CLIENT_ID + "&scope=user repo");
   }
-
-
-
-  async function updateIssue(issueID:number ,changeTitle:string ,changeBody:string){
-    const octokit = new Octokit({
-      auth: localStorage.getItem("accessToken")
-    })
-    console.log(issueID,changeTitle,changeBody);
-    try{
-      let issue = await octokit.request('PATCH /repos/{owner}/{repo}/issues/{issue_number}', {
-        owner: OWNER,
-        repo: REPO,
-        body: changeBody,
-        title: changeTitle,
-        issue_number: issueID,
-        headers: {
-          'X-GitHub-Api-Version': '2022-11-28'
-        }
-      })
-      window.location.assign("http://localhost:3000/");
-      return issue
-    }
-    catch(error:any){
-      console.log(error.status);
-      if(error.status == 404){
-        return null;
-      }
-      return undefined;
-    }
-  }
-
-
 
   return (
     <div className="app-container">
@@ -118,8 +93,7 @@ function App() {
         </>
         }
       </div>
-      {(userData.login === "" || !localStorage.getItem("accessToken")) ? <></>:<Content
-            updateIssue = {(issueID,changeTitle,changeBody):any=>{updateIssue(issueID,changeTitle,changeBody)}} userData = {userData.login}/>}
+      {(userData.login === "" || !localStorage.getItem("accessToken")) ? <></>:<Content userData = {userData.login}/>}
     </div>
     
   );
