@@ -43,7 +43,7 @@ const Create:React.FC<CreateProps> = (props) => {
             'X-GitHub-Api-Version': '2022-11-28'
           }
         })
-        window.location.assign("http://localhost:3000/");
+        window.location.assign("https://fatcatorange.github.io/Dcard/");
       }
 
     return (

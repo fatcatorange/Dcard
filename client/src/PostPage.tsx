@@ -20,8 +20,8 @@ const PostPage:React.FC<PostPageProps> = (props) => {
     const [comments,setComments] = React.useState<JSX.Element[] | undefined>(undefined);
     const [displayComments,setDisplayComments] = React.useState(false);
     const [updating,setUpdating] = React.useState(false);
-    const [title,setTitle] = React.useState("");
-    const [body,setBody] = React.useState("");
+    const [title,setTitle] = React.useState(props.title);
+    const [body,setBody] = React.useState(props.body);
     const [warning,setWarning] = React.useState("");
 
 
@@ -31,7 +31,6 @@ const PostPage:React.FC<PostPageProps> = (props) => {
         })
         
         try{
-            console.log(props.id);
           const res = await octokit.request('GET /repos/{owner}/{repo}/issues/{issue_number}/comments', {
             owner: OWNER,
             repo: REPO,
@@ -40,7 +39,6 @@ const PostPage:React.FC<PostPageProps> = (props) => {
               'X-GitHub-Api-Version': '2022-11-28'
             }
           })
-          console.log(res)
           let temp:JSX.Element[] = [];
           for(let i=0;i<res.data.length;i++){
             temp.push(<Comment key = {props.id + "comment" + i} id = {res.data[i].id}  body = {res.data[i].body}/>);
@@ -69,7 +67,8 @@ const PostPage:React.FC<PostPageProps> = (props) => {
             'X-GitHub-Api-Version': '2022-11-28'
             }
         })
-        window.location.assign("http://localhost:3000/");
+        console.log(issue)
+        window.location.assign("https://fatcatorange.github.io/Dcard/");
         return issue
         }
         catch(error:any){
@@ -96,7 +95,7 @@ const PostPage:React.FC<PostPageProps> = (props) => {
               'X-GitHub-Api-Version': '2022-11-28'
             }
           })
-          window.location.assign("http://localhost:3000/");
+          window.location.assign("https://fatcatorange.github.io/Dcard/");
     
         }
         catch(error){
@@ -115,9 +114,9 @@ const PostPage:React.FC<PostPageProps> = (props) => {
         setTitle(event.target.value);
       }
     
-      function handleChangeBody(event: React.ChangeEvent<HTMLTextAreaElement>){
-        setBody(event.target.value);
-      }
+    function handleChangeBody(event: React.ChangeEvent<HTMLTextAreaElement>){
+      setBody(event.target.value);
+    }
 
     return (
         <div className="PostPage-container" >
@@ -165,11 +164,11 @@ const PostPage:React.FC<PostPageProps> = (props) => {
           </div>
             {warning !== "" && <h5 className="warning">{warning}</h5>}
             <button onClick = {()=>{
-            if(body.length < 30 || title.trim() === ""){
-                setWarning("Your body field is not long enough or the title is empty!");
-                return;
-            }
-            updateIssue(props.id,title,body)
+              if(body.length < 30 || title.trim() === ""){
+                  setWarning("Your body field is not long enough or the title is empty!");
+                  return;
+              }
+              updateIssue(props.id,title,body)
             }} className="issue-button">submit</button>
           
         </div>
@@ -180,7 +179,3 @@ const PostPage:React.FC<PostPageProps> = (props) => {
 }
 
 export default PostPage;
-
-/*updating === true ? 
-      
-      :*/
