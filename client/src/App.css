@@ -113,3 +113,44 @@
   background-color: #589dc5;
   cursor: pointer;
 }
+
+.introduction-display{
+  margin-top: 100px;
+  margin-right:10%;
+}
+
+.jimmy{
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr 100px;
+  text-align: center;
+  left:10%;
+  width:90%;
+  height: 100px;
+  animation-name: loading-left;
+  animation-duration: 2s;
+}
+
+@keyframes loading-left {
+  from {left:-100%}
+  to {left: 10%}
+}
+
+.arrow-up {
+  margin-top:10px;
+  width: 0;
+  height: 0;
+  margin-left: 10px;
+  border-left: 10px solid transparent;
+  border-right: 10px solid transparent;
+  border-bottom: 20px solid #3397CF;
+  animation-name: arrow-up-animation;
+  animation-duration: 0.5s;
+  animation-iteration-count: infinite;
+  animation-direction: alternate;
+}
+
+@keyframes arrow-up-animation {
+  from {margin-top:5px}
+  to {margin-top: 10px}
+}

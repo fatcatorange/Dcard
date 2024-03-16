@@ -17,6 +17,12 @@ type Data = {
 function App() {
   const [rerender,setRerender] = React.useState(false); //use for rerender component
   const [userData,setUserData] = React.useState<Data>({login:""});
+  const [login,setLogin] = React.useState(()=>{
+    const queryString = window.location.search;
+    const urlParams = new URLSearchParams(queryString);
+    const codeParam = urlParams.get("code");
+    return codeParam !== null;
+  });
   React.useEffect(()=>{
     const queryString = window.location.search;
     const urlParams = new URLSearchParams(queryString);
@@ -77,6 +83,10 @@ function App() {
   function loginWithGithub() {
     window.location.assign("https://github.com/login/oauth/authorize?client_id=" + CLIENT_ID + "&scope=user repo");
   }
+  
+  React.useEffect(function(){
+
+  },[])
 
   return (
     <div className="app-container">
@@ -85,7 +95,7 @@ function App() {
         <h2 className='header-item'>Daniel's blog</h2>
         {localStorage.getItem("accessToken")?
         <>
-        <button className='login-button' onClick = {()=>{localStorage.removeItem("accessToken"); setRerender(prev=>(!prev))}}>logout</button>
+        <button className='login-button' onClick = {()=>{localStorage.removeItem("accessToken"); setRerender(prev=>(!prev)); setLogin(false)}}>logout</button>
         </>
         :
         <>
@@ -93,7 +103,20 @@ function App() {
         </>
         }
       </div>
-      {(userData.login === "" || !localStorage.getItem("accessToken")) ? <></>:<Content userData = {userData.login}/>}
+      {(userData.login === "" || !localStorage.getItem("accessToken")) ? 
+      <>
+      {(login === false) && 
+      <div className="jimmy">
+        <div className='introduction-display'>
+          <h2>Welcome to Daniel's blog!</h2>
+          <h3>Please log in using your GitHub account.</h3>
+        </div>
+        
+        <div className='arrow-up'></div>
+      </div>}  
+      </>
+      :
+      <Content userData = {userData.login}/>}
     </div>
     
   );
