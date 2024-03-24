@@ -95,6 +95,9 @@ const Content:React.FC<ContentProps> = (props) => {
           'accept': 'application/vnd.github.raw+json'
         }
       })
+      if(lockRef.current === true){
+        return undefined;
+      }
       let retArr:IssueData[] = [];
       for(let i=0;i<res.data.length;i++){
         const issueData:IssueData = {
@@ -131,9 +134,11 @@ const Content:React.FC<ContentProps> = (props) => {
     if(res === undefined){
       return;
     }
-
-    lockRef.current = true;
     let tmpIssuePage:JSX.Element[] = [];
+    if(nowRef.current - 1 > nowDisplay.length/10){
+      return;
+    }
+    lockRef.current = true;
     for(let i=0; i<res.length ;i++){
       let nowID = nowRef.current;
       const index = i + ((nowID - 1) * 10); //calculate the index of the issue
