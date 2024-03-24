@@ -1,6 +1,6 @@
-import './App.css';
+import './css/App.css';
 import React from 'react';
-import Content from './Content';
+import Content from './components/Content';
 import { CLIENT_ID,REPO,OWNER} from './Information';
 
 const { Octokit } = require("@octokit/rest");
@@ -73,7 +73,6 @@ function App() {
       return response.json();
     }).then((data) => {
       setUserData({login:data.login});
-      console.log(userData);
     })
   }
 

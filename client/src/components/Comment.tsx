@@ -1,6 +1,6 @@
 import React from "react";
 import Markdown from "react-markdown";
-import './Comment.css';
+import '../css/Comment.css';
 
 type CommentProps = {
   id:number,

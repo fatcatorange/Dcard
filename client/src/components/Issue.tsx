@@ -1,5 +1,5 @@
 import React, { ReactElement } from "react";
-import './Issue.css'
+import '../css/Issue.css'
 
 type IssueProps = {
   id: number;

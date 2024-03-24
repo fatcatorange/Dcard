@@ -2,7 +2,7 @@ import React from "react";
 import Issue from "./Issue";
 import PostPage from "./PostPage";
 import Create from "./Create";
-import { OWNER, REPO } from "./Information";
+import { OWNER, REPO } from "../Information";
 
 const { Octokit } = require("@octokit/rest");
 
@@ -60,8 +60,6 @@ const Content:React.FC<ContentProps> = (props) => {
           'accept': 'application/vnd.github.raw+json'
         }
       })
-
-      console.log(res);
       let retArr:IssueData[] = [];
       for(let i=0;i<res.data.length;i++){
         const issueData:IssueData = {
@@ -88,11 +86,11 @@ const Content:React.FC<ContentProps> = (props) => {
   if the bottom is true, it means there are no more issues, just return.
    */
   async function getTenIssue(){
-    if(bottom === true) 
+    if(bottom === true || lockRef.current === true) 
       return;
 
     let res:any = await listTenIssue();
-    if(res === undefined || lockRef.current === true){
+    if(res === undefined){
       return;
     }
 

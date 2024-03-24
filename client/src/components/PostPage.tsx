@@ -1,8 +1,8 @@
 import React from "react";
-import Issue from "./Issue";
 import Comment from "./Comment";
+import Warning from "./Warning";
 import Markdown from "react-markdown";
-import { REPO,OWNER} from './Information';
+import { REPO,OWNER} from '../Information';
 
 const { Octokit } = require("@octokit/rest");
 
@@ -10,22 +10,25 @@ const { Octokit } = require("@octokit/rest");
 type PostPageProps = {
     title:string,
     body:string,
-    id:string | number,
-    userData:string | undefined,
-    number:number,
-    backToContent:()=>void
+    id:string | number, // the issue index (not id)
+    userData:string | undefined, // username
+    number:number, // the issue number (not id)
+    backToContent:()=>void // back to browse all issue
 }
 
 const PostPage:React.FC<PostPageProps> = (props) => {
-    const [comments,setComments] = React.useState<JSX.Element[] | undefined>(undefined);
-    const [displayComments,setDisplayComments] = React.useState(false);
-    const [updating,setUpdating] = React.useState(false);
+    const [comments,setComments] = React.useState<JSX.Element[] | undefined>(undefined); //all comemts
+    const [displayComments,setDisplayComments] = React.useState(false); //display comments or not
+    const [updating,setUpdating] = React.useState(false); // the user is updating the issue or not
     const [title,setTitle] = React.useState(props.title);
     const [body,setBody] = React.useState(props.body);
-    const [warning,setWarning] = React.useState("");
+    const [warning,setWarning] = React.useState(" ");
 
+    /*
+    Retrieve the comments for the issue and store each comment component in an array.
+    */
 
-    async function getIssueCommit(){
+    async function getIssueComments(){
         const octokit = new Octokit({
           auth: localStorage.getItem('accessToken')
         })
@@ -44,7 +47,6 @@ const PostPage:React.FC<PostPageProps> = (props) => {
             temp.push(<Comment key = {props.id + "comment" + i} id = {res.data[i].id}  body = {res.data[i].body}/>);
           }
           setComments(temp);
-          console.log(temp);
         }
         catch(error){
           console.log(error);
@@ -67,18 +69,21 @@ const PostPage:React.FC<PostPageProps> = (props) => {
             'X-GitHub-Api-Version': '2022-11-28'
             }
         })
-        console.log(issue)
         window.location.assign("https://fatcatorange.github.io/Dcard/");
         return issue
         }
         catch(error:any){
-        console.log(error.status);
-        if(error.status == 404){
-            return null;
-        }
-        return undefined;
+          console.log(error.status);
+          if(error.status == 404){
+              return null;
+          }
+          return undefined;
         }
     }
+
+    /*
+    closed the post
+     */
 
     async function handleClosedPost(){
         try{
@@ -104,8 +109,8 @@ const PostPage:React.FC<PostPageProps> = (props) => {
       }
       
     async function handleCommentsDisplay(){
-        if(comments === undefined){
-          await getIssueCommit();
+        if(comments === undefined){  //If the comments are undefined, it means they haven't been loaded yet.
+          await getIssueComments();
         }
         setDisplayComments(prev=>!prev);
     }
@@ -117,6 +122,16 @@ const PostPage:React.FC<PostPageProps> = (props) => {
     function handleChangeBody(event: React.ChangeEvent<HTMLTextAreaElement>){
       setBody(event.target.value);
     }
+
+    /*
+    If the user is not the owner, they cannot update the issue.
+    Therefore, we hide the update and delete buttons. However, 
+    even if a normal user clicks the button, they cannot delete 
+    or update the issue due to GitHub's permissions.
+
+    The two textareas are used for inputting the title and body,
+    while the button is used to update the issue.
+    */
 
     return (
         <div className="PostPage-container" >
@@ -162,7 +177,7 @@ const PostPage:React.FC<PostPageProps> = (props) => {
                 style={{width:'80%', height:'300px'}}
             />
           </div>
-            {warning !== "" && <h5 className="warning">{warning}</h5>}
+            <br></br>
             <button onClick = {()=>{
               if(body.length < 30 || title.trim() === ""){
                   setWarning("Your body field is not long enough or the title is empty!");
@@ -170,7 +185,7 @@ const PostPage:React.FC<PostPageProps> = (props) => {
               }
               updateIssue(props.id,title,body)
             }} className="issue-button">submit</button>
-          
+            <Warning warningContent = {warning}/>
         </div>
       }
             

@@ -1,20 +1,15 @@
 import React from "react";
-import Issue from "./Issue";
-import Comment from "./Comment";
-import Markdown from "react-markdown";
-import { REPO,OWNER} from './Information';
+import { REPO,OWNER} from '../Information';
+import Warning from "./Warning";
 
 const { Octokit } = require("@octokit/rest");
 
 
-type CreateProps = {
-}
-
-const Create:React.FC<CreateProps> = (props) => {
+const Create:React.FC = () => {
 
     const [title,setTitle] = React.useState("");
     const [body,setBody] = React.useState("");
-    const [warning,setWarning] = React.useState("");
+    const [warning,setWarning] = React.useState(""); 
 
     function handleChangeTitle(event: React.ChangeEvent<HTMLTextAreaElement>){
         setTitle(event.target.value);
@@ -24,13 +19,17 @@ const Create:React.FC<CreateProps> = (props) => {
       setBody(event.target.value);
     }
 
+    /*
+      If the body has less than 30 characters or the title is empty,
+      set a warning and do not create; otherwise, create the post an redirect to the content page
+     */
     async function createIssue(){
       if(body.length < 30 || title.trim() === ""){
         setWarning("Your body field is not long enough or the title is empty!");
         return;
       }
 
-    const octokit = new Octokit({
+      const octokit = new Octokit({
           auth: localStorage.getItem("accessToken")
       })
         
@@ -45,7 +44,10 @@ const Create:React.FC<CreateProps> = (props) => {
         })
         window.location.assign("https://fatcatorange.github.io/Dcard/");
       }
-
+    /*
+      The two textareas are used for inputting the title and body,
+      while the button is used to create the issue.
+     */
     return (
       <div>
           <div>
@@ -67,15 +69,15 @@ const Create:React.FC<CreateProps> = (props) => {
                 style={{width:'80%', height:'300px'}}
             />
           </div>
-            {warning !== "" && <h5 className="warning">{warning}</h5>}
+            <br></br>
             <button onClick = {()=>{
-            if(body.length < 30 || title.trim() === ""){
-                setWarning("Your body field is not long enough or the title is empty!");
-                return;
-            }
-            createIssue()
+              if(body.length < 30 || title.trim() === ""){
+                  setWarning("Your body field is not long enough or the title is empty!");
+                  return;
+              }
+              createIssue()
             }} className="issue-button">submit</button>
-          
+            <Warning warningContent={warning}/>
         </div>
     )
 }
