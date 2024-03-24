@@ -49,15 +49,16 @@
 }
 
 .submit-button{
-  width: 80px;
-  height: 40px;
-  margin-right: 20px;
+  width: 62px;
+  height: 37px;
+  margin-top:10px;
   padding: 10px;
   font-size: 15px;
   border-radius: 10px;
   background-color: #3397CF;
   color: white;
   border-style: none;
+
 }
 
 .submit-button:hover{
@@ -65,13 +66,17 @@
   cursor: pointer;
 }
 
-
+.content::before{
+  content: '';
+}
 
 .content{
   background-color: #052e46;
-  padding:30px;
-  padding-left:20vw;
-  padding-right:20vw;
+  padding-top: 20px;
+  padding-bottom: 20px;
+  width:100vw;
+  display: grid;
+  grid-template-columns: auto 782px auto;
   height: auto;
   color: black;
   overflow-y: scroll;
@@ -81,10 +86,12 @@
   color:red;
 }
 
+
 .PostPage-container{
   min-height: 50vh;
   background-color: white;
-  padding: 10px;
+  padding: 20px;
+  padding-left: 50px;
   border-radius: 10px;
 }
 
@@ -95,12 +102,15 @@
 .tool-bar{
   display: grid;
   grid-template-columns: 15fr 1fr;
+  border-bottom-style: solid;
+  border-bottom-width: 1px;
+  border-bottom-color: gray;
 }
 
 .tool-button{
-  width: 80px;
+  width: 62px;
+  height: 36px;
   margin-right: 20px;
-  padding: 10px;
   font-size: 15px;
   border-radius: 10px;
   background-color: #3397CF;

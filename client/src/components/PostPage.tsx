@@ -13,6 +13,8 @@ type PostPageProps = {
     id:string | number, // the issue index (not id)
     userData:string | undefined, // username
     number:number, // the issue number (not id)
+    mostReaction: string, // the most used emoji
+    reactionCount: number,  
     backToContent:()=>void // back to browse all issue
 }
 
@@ -132,7 +134,7 @@ const PostPage:React.FC<PostPageProps> = (props) => {
     The two textareas are used for inputting the title and body,
     while the button is used to update the issue.
     */
-
+    
     return (
         <div className="PostPage-container" >
             <div className="tool-bar">
@@ -150,6 +152,7 @@ const PostPage:React.FC<PostPageProps> = (props) => {
             <div>
             <h1>{props.title}</h1>
             <Markdown>{props.body}</Markdown>
+            <span>{props.mostReaction} {props.reactionCount}</span>
             {<div className="rightLine"></div> &&
             <div className="comment-display-button" onClick = {handleCommentsDisplay}>comment</div> }
             {displayComments === true && comments}

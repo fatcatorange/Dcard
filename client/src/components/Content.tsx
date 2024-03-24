@@ -6,6 +6,18 @@ import { OWNER, REPO } from "../Information";
 
 const { Octokit } = require("@octokit/rest");
 
+
+let emojiMap = new Map([
+  ['+1', '👍'],
+  ['-1', '👎'],
+  ['laugh', '😄'],
+  ['confused', '😕'],
+  ['heart', '❤️'],
+  ['hooray', '🎉'],
+  ['rocket', '🚀'],
+  ['eyes', '👀']
+])
+
 /*
 IssueData get by listTenIssue function
 */
@@ -14,7 +26,10 @@ type IssueData = {
   title:string,
   body:string,
   id:string|number,
-  number: number
+  number: number,
+  commentsAmount: number,
+  reactionAmount: number,
+  mostReaction: string
 }
 
 type ContentProps = {
@@ -37,7 +52,27 @@ const Content:React.FC<ContentProps> = (props) => {
   const lockRef = React.useRef(false); // prevent users from scrolling down too fast and making multiple API calls.
 
 
+ 
   /*
+  Check the most frequently used emoji.
+  The default emoji is 👍
+   */
+  function checkEmojistring(reactions:any) : string{
+    let ret:string = '👍';
+    let maxCount:number = 0;
+    for (let key in reactions) {
+      if (reactions.hasOwnProperty(key)) {
+        const emoji:undefined|string = emojiMap.get(key);
+          if(emoji != undefined && reactions[key] > maxCount){
+            maxCount = reactions[key];
+            ret = emoji;
+          }
+      }
+    }
+    return ret;
+  }
+
+   /*
   Get ten issues from GitHub,
   and add the issue data to the 'content' state.
    */
@@ -67,6 +102,9 @@ const Content:React.FC<ContentProps> = (props) => {
           body:res.data[i].body,
           id:res.data[i].id,
           number:res.data[i].number,
+          commentsAmount: res.data[i].comments,
+          reactionAmount: res.data[i].reactions.total_count,
+          mostReaction: checkEmojistring(res.data[i].reactions)
         }
         retArr.push(issueData);
       }
@@ -95,13 +133,12 @@ const Content:React.FC<ContentProps> = (props) => {
     }
 
     lockRef.current = true;
-
     let tmpIssuePage:JSX.Element[] = [];
     for(let i=0; i<res.length ;i++){
       let nowID = nowRef.current;
       const index = i + ((nowID - 1) * 10); //calculate the index of the issue
-      const content = <Issue id = {index + 1} title = {res[i].title} body = {res[i].body} key = {"issue" + index} 
-      setBrowse = {()=>{setBrowsing(index + 1)}} userData = {props.userData}/>
+      const content = <Issue id = {index + 1} title = {res[i].title} body = {res[i].body} key = {"issue" + index}  mostReaction = {res[i].mostReaction}
+      setBrowse = {()=>{setBrowsing(index + 1)}} userData = {props.userData} commentsAmount = {res[i].commentsAmount} reactionAmount = {res[i].reactionAmount}/>
       tmpIssuePage.push(content);
       res[i].id = index + 1;
     }
@@ -151,8 +188,8 @@ const Content:React.FC<ContentProps> = (props) => {
           
         </div>
         :
-        <PostPage title = {content[browsing - 1].title} id = {content[browsing - 1].id} number = {content[browsing - 1].number}
-          body= {content[browsing - 1].body} backToContent = {()=>setBrowsing(0)} userData = {props.userData} />
+        <PostPage title = {content[browsing - 1].title} id = {content[browsing - 1].id} number = {content[browsing - 1].number} mostReaction={content[browsing - 1].mostReaction}
+          body= {content[browsing - 1].body} backToContent = {()=>setBrowsing(0)} userData = {props.userData} reactionCount={content[browsing - 1].reactionAmount}/>
       }
       
     </div>
