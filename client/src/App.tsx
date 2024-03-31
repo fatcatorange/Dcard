@@ -2,7 +2,7 @@ import './css/App.css';
 import React from 'react';
 import Content from './components/Content';
 import { CLIENT_ID,REPO,OWNER} from './Information';
-
+import Modal from './components/Modal';
 const { Octokit } = require("@octokit/rest");
 
 /*
@@ -17,6 +17,7 @@ type Data = {
 function App() {
   const [rerender,setRerender] = React.useState(false); //use for rerender component
   const [userData,setUserData] = React.useState<Data>({login:""});
+  const [error, setError] = React.useState("");
   const [login,setLogin] = React.useState(()=>{
     const queryString = window.location.search;
     const urlParams = new URLSearchParams(queryString);
@@ -32,19 +33,25 @@ function App() {
     Using the API to request an AccessToken for the user from the server,token will store in localStorage
      */
     async function getAccessToken(){
-      await fetch("https://2c07-2001-288-7001-270c-740d-e72a-37b7-80df.ngrok-free.app/getAccessToken/?code=" + codeParam,{
-        method:"GET",
-        headers:{
-          'ngrok-skip-browser-warning': 'true'
-        }
-      }).then((response)=>{
-        return response.json();
-      }).then((data)=>{
-        if(data.access_token){
-          localStorage.setItem("accessToken",data.access_token);
-          setRerender(!rerender);
-        }
-      })
+      try{
+          await fetch("https://2c07-2001-288-7001-270c-740d-e72a-37b7-80df.ngrok-free.app/getAccessToken/?code=" + codeParam,{
+          method:"GET",
+          headers:{
+            'ngrok-skip-browser-warning': 'true'
+          }
+        }).then((response)=>{
+          return response.json();
+        }).then((data)=>{
+          if(data.access_token){
+            localStorage.setItem("accessToken",data.access_token);
+            setRerender(!rerender);
+          }
+        })
+      }
+      catch(error){
+        setError("something wrong, please try again later");
+      }
+      
     }
 
     /*
@@ -63,17 +70,21 @@ function App() {
 
 
   async function getUserData(){
-    await fetch("https://2c07-2001-288-7001-270c-740d-e72a-37b7-80df.ngrok-free.app/getUserData", {
-      method: "GET",
-      headers: {
-        "Authorization" : "Bearer " + localStorage.getItem("accessToken"),
-        'ngrok-skip-browser-warning': 'true'
-      }
-    }).then((response) => {
-      return response.json();
-    }).then((data) => {
-      setUserData({login:data.login});
-    })
+    try {
+      await fetch("https://2c07-2001-288-7001-270c-740d-e72a-37b7-80df.ngrok-free.app/getUserData", {
+        method: "GET",
+        headers: {
+          "Authorization" : "Bearer " + localStorage.getItem("accessToken"),
+          'ngrok-skip-browser-warning': 'true'
+        }
+      }).then((response) => {
+        return response.json();
+      }).then((data) => {
+        setUserData({login:data.login});
+      })
+    } catch (error) {
+      setError("something wrong, please try again later");
+    }
   }
 
   /*
@@ -89,6 +100,7 @@ function App() {
 
   return (
     <div className="app-container">
+      {error !== "" && <Modal warningContent={error} setWarningContent={()=>setError("")}/>}
       <div className="header">
         <div></div>
         <h2 className='header-item'>Daniel's blog</h2>
@@ -102,7 +114,7 @@ function App() {
         </>
         }
       </div>
-      {(userData.login === "" || !localStorage.getItem("accessToken")) ? 
+      {(!localStorage.getItem("accessToken") ) ? 
       <>
       {(login === false) && 
       <div className="jimmy">
