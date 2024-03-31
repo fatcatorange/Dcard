@@ -2,6 +2,7 @@ import React from "react";
 import Issue from "./Issue";
 import PostPage from "./PostPage";
 import Create from "./Create";
+import Modal from "./Modal";
 import { OWNER, REPO } from "../Information";
 
 const { Octokit } = require("@octokit/rest");
@@ -50,7 +51,8 @@ const Content:React.FC<ContentProps> = (props) => {
   const [creating,setCreating] = React.useState(false); // Check whether the user is currently creating a new issue.
   const nowRef = React.useRef(1); // The page intends to get now.
   const lockRef = React.useRef(false); // prevent users from scrolling down too fast and making multiple API calls.
-
+  const scrollPositionRef = React.useRef<number>(0); // scroll position
+  const [error, setError] = React.useState("");
 
  
   /*
@@ -81,7 +83,6 @@ const Content:React.FC<ContentProps> = (props) => {
       const octokit = new Octokit({
         auth: localStorage.getItem("accessToken")
       })
-      
       const res = await octokit.request('GET /repos/{owner}/{repo}/issues', {
         owner: OWNER,
         repo: REPO,
@@ -115,7 +116,7 @@ const Content:React.FC<ContentProps> = (props) => {
       return retArr;
     }
     catch(error){
-      console.log(error);
+      setError("something wrong, please try again later");
       return undefined;
     }
   }
@@ -143,7 +144,8 @@ const Content:React.FC<ContentProps> = (props) => {
       let nowID = nowRef.current;
       const index = i + ((nowID - 1) * 10); //calculate the index of the issue
       const content = <Issue id = {index + 1} title = {res[i].title} body = {res[i].body} key = {"issue" + index}  mostReaction = {res[i].mostReaction}
-      setBrowse = {()=>{setBrowsing(index + 1)}} userData = {props.userData} commentsAmount = {res[i].commentsAmount} reactionAmount = {res[i].reactionAmount}/>
+      setBrowse = {()=>{setBrowsing(index + 1); scrollPositionRef.current = containerRef.current?.scrollTop == undefined ? 0 : containerRef.current?.scrollTop}} 
+      userData = {props.userData} commentsAmount = {res[i].commentsAmount} reactionAmount = {res[i].reactionAmount}/>
       tmpIssuePage.push(content);
       res[i].id = index + 1;
     }
@@ -176,9 +178,19 @@ const Content:React.FC<ContentProps> = (props) => {
     getTenIssue();
   },[])
 
+  /*
+  When the user returns to the browsing page,
+  it should automatically scroll to the position 
+  where they were before visiting to the PostPage.
+  */
+  React.useEffect(function(){
+    if(containerRef.current?.scrollTop != null)
+      containerRef.current.scrollTop = scrollPositionRef.current;
+  },[browsing])
 
   return (
     <div className="content" ref = {containerRef} onScroll={handleScroll}>
+      <Modal warningContent={error} setWarningContent={()=>setError("")}/>
       {browsing === 0? // Check if the user is currently browsing a issue now
         <div className="all-issue-container">
           {props.userData === OWNER && <button className="create-button" onClick={()=>setCreating(prev=>!prev)}>{creating === false ? "create" : "cancel"}</button>}

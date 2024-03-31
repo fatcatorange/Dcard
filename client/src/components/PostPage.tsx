@@ -1,8 +1,10 @@
 import React from "react";
+import { createPortal } from 'react-dom';
 import Comment from "./Comment";
 import Warning from "./Warning";
 import Markdown from "react-markdown";
-import { REPO,OWNER} from '../Information';
+import Modal from "./Modal";
+import { REPO,OWNER, HomePage} from '../Information';
 
 const { Octokit } = require("@octokit/rest");
 
@@ -25,6 +27,7 @@ const PostPage:React.FC<PostPageProps> = (props) => {
     const [title,setTitle] = React.useState(props.title);
     const [body,setBody] = React.useState(props.body);
     const [warning,setWarning] = React.useState(" ");
+    const [error,setError] = React.useState("");
 
     /*
     Retrieve the comments for the issue and store each comment component in an array.
@@ -51,6 +54,7 @@ const PostPage:React.FC<PostPageProps> = (props) => {
           setComments(temp);
         }
         catch(error){
+          setError("something wrong, please try it later!");
           console.log(error);
         }
         
@@ -71,14 +75,12 @@ const PostPage:React.FC<PostPageProps> = (props) => {
             'X-GitHub-Api-Version': '2022-11-28'
             }
         })
-        window.location.assign("https://fatcatorange.github.io/Dcard/");
+        window.location.assign(HomePage);
         return issue
         }
         catch(error:any){
           console.log(error.status);
-          if(error.status == 404){
-              return null;
-          }
+          setError("something wrong, please try again later");
           return undefined;
         }
     }
@@ -102,10 +104,11 @@ const PostPage:React.FC<PostPageProps> = (props) => {
               'X-GitHub-Api-Version': '2022-11-28'
             }
           })
-          window.location.assign("https://fatcatorange.github.io/Dcard/");
+          window.location.assign(HomePage);
     
         }
         catch(error){
+          setError("something wrong, please try again later");
           console.log(error);
         }
       }
@@ -124,7 +127,6 @@ const PostPage:React.FC<PostPageProps> = (props) => {
     function handleChangeBody(event: React.ChangeEvent<HTMLTextAreaElement>){
       setBody(event.target.value);
     }
-
     /*
     If the user is not the owner, they cannot update the issue.
     Therefore, we hide the update and delete buttons. However, 
@@ -136,7 +138,8 @@ const PostPage:React.FC<PostPageProps> = (props) => {
     */
     
     return (
-        <div className="PostPage-container" >
+        <div className="PostPage-container" id="pt" >
+            {error !== "" && <Modal warningContent={error} setWarningContent={()=>setError("")}/>}
             <div className="tool-bar">
                 <button onClick={props.backToContent} className="submit-button">back</button>
                 {props.userData != undefined && props.userData === OWNER? 

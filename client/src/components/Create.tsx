@@ -1,6 +1,7 @@
 import React from "react";
-import { REPO,OWNER} from '../Information';
+import { REPO,OWNER, HomePage} from '../Information';
 import Warning from "./Warning";
+import Modal from "./Modal";
 
 const { Octokit } = require("@octokit/rest");
 
@@ -10,6 +11,7 @@ const Create:React.FC = () => {
     const [title,setTitle] = React.useState("");
     const [body,setBody] = React.useState("");
     const [warning,setWarning] = React.useState(""); 
+    const [error,setError] = React.useState("");
 
     function handleChangeTitle(event: React.ChangeEvent<HTMLTextAreaElement>){
         setTitle(event.target.value);
@@ -32,17 +34,21 @@ const Create:React.FC = () => {
       const octokit = new Octokit({
           auth: localStorage.getItem("accessToken")
       })
+        try {
+          await octokit.request('POST /repos/{owner}/{repo}/issues', {
+            owner: OWNER,
+            repo: REPO,
+            title: title,
+            body: body,
+            headers: {
+              'X-GitHub-Api-Version': '2022-11-28'
+            }
+          })
+          window.location.assign(HomePage);
+        } catch (error) {
+          setError("something wrong, please try it later!");
+        }
         
-        await octokit.request('POST /repos/{owner}/{repo}/issues', {
-          owner: OWNER,
-          repo: REPO,
-          title: title,
-          body: body,
-          headers: {
-            'X-GitHub-Api-Version': '2022-11-28'
-          }
-        })
-        window.location.assign("https://fatcatorange.github.io/Dcard/");
       }
     /*
       The two textareas are used for inputting the title and body,
@@ -50,6 +56,7 @@ const Create:React.FC = () => {
      */
     return (
       <div>
+          {error !== "" && <Modal warningContent="something wrong please try again later" setWarningContent={()=>setError("")}/>}
           <div>
             <h3>title:</h3>
             <textarea 
