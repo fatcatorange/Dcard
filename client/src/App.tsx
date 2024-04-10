@@ -1,7 +1,7 @@
 import './css/App.css';
 import React from 'react';
 import Content from './components/Content';
-import { CLIENT_ID,REPO,OWNER} from './Information';
+import { CLIENT_ID, SERVER_URL} from './Information';
 import Modal from './components/Modal';
 const { Octokit } = require("@octokit/rest");
 
@@ -34,7 +34,7 @@ function App() {
      */
     async function getAccessToken(){
       try{
-          await fetch("https://2c07-2001-288-7001-270c-740d-e72a-37b7-80df.ngrok-free.app/getAccessToken/?code=" + codeParam,{
+          await fetch( SERVER_URL + "/getAccessToken/?code=" + codeParam,{
           method:"GET",
           headers:{
             'ngrok-skip-browser-warning': 'true'
@@ -71,7 +71,7 @@ function App() {
 
   async function getUserData(){
     try {
-      await fetch("https://2c07-2001-288-7001-270c-740d-e72a-37b7-80df.ngrok-free.app/getUserData", {
+      await fetch(SERVER_URL + "/getUserData", {
         method: "GET",
         headers: {
           "Authorization" : "Bearer " + localStorage.getItem("accessToken"),
